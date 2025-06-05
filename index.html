@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt-BR"> <!-- O atributo lang será atualizado via JS -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-key="pageTitle">PTCGP - Cartas do Set</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .card-image {
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 5 / 7;
+        }
+        .card-image img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 0.375rem;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #2563eb;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            max-height: 90vh;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 600px;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-close-btn:hover {
+            background-color: #dc2626;
+        }
+        .energy-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 4px;
+            vertical-align: middle; 
+            display: inline-block; 
+        }
+        .energy-text-fallback {
+            font-size: 0.75rem;
+            padding: 0.1rem 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            margin-right: 4px;
+            vertical-align: middle;
+            display: inline-block;
+            background-color: #f0f0f0;
+        }
+        #language-selector-container {
+            margin-bottom: 1rem;
+        }
+        #language-selector, #set-filter, #type-filter, #cards-per-page-filter, #card-size-filter {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            background-color: white;
+        }
+        #search-input {
+             padding: 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+        }
+        #set-info-container { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem; 
+            margin-bottom: 1rem; 
+            flex-wrap: wrap; 
+        }
+        #set-logo-img, #set-symbol-img {
+            max-height: 40px; 
+            width: auto;
+            display: none; 
+        }
+        #set-symbol-img {
+             max-height: 30px; 
+        }
+        .filters-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: #f9fafb; 
+            border-radius: 0.5rem; 
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem; 
+        }
+        .filter-group label {
+            font-size: 0.875rem; 
+            font-weight: 500; 
+            color: #374151; 
+        }
+        #load-more-btn {
+            transition: background-color 0.2s ease-in-out;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-4">
+        <header class="mb-4 text-center"> 
+            <div id="language-selector-container" class="flex justify-center sm:justify-end mb-4">
+                <select id="language-selector" aria-label="Selecionar Idioma">
+                    <option value="pt-br">Português (BR)</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                    <option value="it">Italiano</option>
+                    <option value="ja">日本語</option>
+                    <option value="ko">한국어</option>
+                    <option value="zh-tw">繁體中文</option>
+                    <option value="th">ไทย</option>
+                    <option value="id">Bahasa Indonesia</option>
+                </select>
+            </div>
+
+            <div class="filters-container justify-center">
+                <div class="filter-group">
+                    <label for="search-input" data-translate-key="filterTextLabel">Filtrar por Texto:</label>
+                    <input type="text" id="search-input" data-translate-placeholder="filterTextPlaceholder" placeholder="Digite nome da carta...">
+                </div>
+                <div class="filter-group">
+                    <label for="set-filter" data-translate-key="filterSetLabel">Coleção:</label>
+                    <select id="set-filter"></select>
+                </div>
+                <div class="filter-group">
+                    <label for="type-filter" data-translate-key="filterTypeLabel">Tipo:</label>
+                    <select id="type-filter"></select>
+                </div>
+                 <div class="filter-group">
+                    <label for="cards-per-page-filter" data-translate-key="cardsPerPageLabel">Cartas por Página:</label>
+                    <select id="cards-per-page-filter">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                        <option value="40">40</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all" data-translate-key="allCardsOption">Todas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="card-size-filter" data-translate-key="cardSizeLabel">Tamanho das Cartas:</label>
+                    <select id="card-size-filter">
+                        <option value="small" data-translate-key="sizeSmallOption">Pequeno</option>
+                        <option value="medium" selected data-translate-key="sizeMediumOption">Médio</option>
+                        <option value="large" data-translate-key="sizeLargeOption">Grande</option>
+                    </select>
+                </div>
+            </div>
+
+            <h1 class="text-4xl font-bold text-blue-600 mb-2" data-translate-key="headerTitle">Pokémon TCG</h1>
+            <div id="set-info-container"> 
+                <img id="set-logo-img" alt="Logo da Coleção"> 
+                <img id="set-symbol-img" alt="Símbolo da Coleção" class="hidden"> 
+                <p id="set-name-display" class="text-xl text-gray-600" data-translate-key="loadingSet">Cartas do Set: Carregando...</p>
+            </div>
+        </header>
+
+        <div id="loading-indicator" class="flex justify-center items-center h-64">
+            <div class="loading-spinner"></div>
+            <p class="ml-4 text-lg text-gray-600" data-translate-key="loadingCards">Carregando cartas...</p>
+        </div>
+
+        <main id="cards-grid" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <!-- As cartas serão inseridas aqui pelo JavaScript -->
+        </main>
+        
+        <div id="load-more-container" class="mt-8 text-center hidden">
+            <button id="load-more-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md" data-translate-key="loadMoreButton">
+                Carregar Mais
+            </button>
+        </div>
+
+        <footer class="mt-12 text-center text-gray-500 text-sm">
+            <p><span data-translate-key="footerApiCredit">Dados fornecidos por</span> <a href="https://tcgdex.dev/tcg-pocket" target="_blank" class="text-blue-500 hover:underline">TCGdex API</a>.</p>
+            <p data-translate-key="footerLearningPurpose">Criado para fins de aprendizado.</p>
+        </footer>
+    </div>
+
+    <!-- Estrutura do Modal -->
+    <div id="card-modal-overlay" class="modal-overlay hidden">
+        <div id="card-modal-content" class="modal-content relative">
+            <button id="modal-close-button" class="modal-close-btn">&times;</button>
+            <div id="modal-body" class="space-y-4">
+                <div class="text-center"><div class="loading-spinner inline-block"></div> <span data-translate-key="modalLoadingDetails">Carregando detalhes...</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const cardsGrid = document.getElementById('cards-grid');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const setNameDisplay = document.getElementById('set-name-display');
+        const setLogoImg = document.getElementById('set-logo-img'); 
+        const setSymbolImg = document.getElementById('set-symbol-img'); 
+        
+        const modalOverlay = document.getElementById('card-modal-overlay');
+        const modalContent = document.getElementById('card-modal-content');
+        const modalBody = document.getElementById('modal-body');
+        const modalCloseButton = document.getElementById('modal-close-button');
+        
+        const languageSelector = document.getElementById('language-selector');
+        const searchInput = document.getElementById('search-input');
+        const setFilter = document.getElementById('set-filter');
+        const typeFilter = document.getElementById('type-filter');
+        const cardsPerPageFilter = document.getElementById('cards-per-page-filter');
+        const cardSizeFilter = document.getElementById('card-size-filter');
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const loadMoreContainer = document.getElementById('load-more-container');
+
+        let defaultSetId = 'A1'; 
+        let currentSetId = defaultSetId;
+        let currentLanguage = 'pt-br';
+        let currentSearchTerm = '';
+        let currentSelectedType = '';
+        
+        let allFetchedAndDetailedCards = []; 
+        let currentlyDisplayedCards = [];    
+        let cardsPerPage = 20;
+        let currentPage = 1;
+        let currentCardSize = 'medium'; 
+
+        const ptcgpSetIdsToShow = ['A1', 'A1a', 'A2', 'A2a', 'A2b', 'A3', 'A3a', 'P-A'];
+
+
+        const translations = {
+            'pt-br': {
+                pageTitle: "PTCGP - Cartas do Set",
+                headerTitle: "Pokémon TCG",
+                loadingSet: "Cartas do Set: Carregando...",
+                loadingCards: "Carregando cartas...",
+                footerApiCredit: "Dados fornecidos por",
+                footerLearningPurpose: "Criado para fins de aprendizado.",
+                modalLoadingDetails: "Carregando detalhes...",
+                rarity: "Raridade",
+                illustrator: "Ilustrador",
+                set: "Set",
+                card_id: "ID",
+                evolvesFrom: "Evolui de",
+                regulationMark: "Marca Reg.",
+                abilities: "Habilidades",
+                attacks: "Ataques",
+                cost: "Custo",
+                weaknesses: "Fraqueza(s)",
+                resistances: "Resistência(s)",
+                retreatCost: "Custo Recuo",
+                effect: "Efeito",
+                description: "Descrição",
+                noCardsFound: "Nenhuma carta encontrada para este set ou filtros aplicados.",
+                errorLoadingCards: "Ocorreu um erro ao carregar as cartas. Tente novamente mais tarde. Detalhes: ",
+                errorLoadingCardDetails: "Erro ao carregar detalhes da carta.",
+                hp: "HP",
+                types: "Tipo(s)",
+                category: "Categoria",
+                noRetreatCost: "Nenhum",
+                unavailable: "N/A",
+                imageNotAvailable: "Imagem não disponível",
+                detailedImageNotAvailable: "Sem Imagem Detalhada",
+                finalImageNotAvailable: "Imagem Indisponível",
+                errorSetNotAvailableInLang: "Dados para o set '{setId}' não disponíveis no idioma {languageName}.",
+                errorCardNotAvailableInLang: "Detalhes para la carta '{cardId}' não disponíveis no idioma {languageName}.",
+                filterTextLabel: "Filtrar por Texto:",
+                filterTextPlaceholder: "Digite nome da carta...",
+                filterSetLabel: "Coleção:",
+                filterTypeLabel: "Tipo:",
+                allTypesOption: "Todos os Tipos",
+                noCardsMatchFilters: "Nenhuma carta encontrada com os filtros aplicados.", 
+                noSetsFound: "Nenhuma coleção encontrada.", 
+                errorLoadingTypes: "Erro ao carregar tipos.",
+                cardsPerPageLabel: "Cartas por Página:",
+                allCardsOption: "Todas",
+                cardSizeLabel: "Tamanho das Cartas:",
+                sizeSmallOption: "Pequeno",
+                sizeMediumOption: "Médio",
+                sizeLargeOption: "Grande",
+                loadMoreButton: "Carregar Mais"
+            },
+            'en': { 
+                pageTitle: "PTCGP - Set Cards",
+                headerTitle: "Pokémon TCG",
+                loadingSet: "Set Cards: Loading...",
+                loadingCards: "Loading cards...",
+                footerApiCredit: "Data provided by",
+                footerLearningPurpose: "Created for learning purposes.",
+                modalLoadingDetails: "Loading details...",
+                rarity: "Rarity",
+                illustrator: "Illustrator",
+                set: "Set",
+                card_id: "ID",
+                evolvesFrom: "Evolves from",
+                regulationMark: "Reg. Mark",
+                abilities: "Abilities",
+                attacks: "Attacks",
+                cost: "Cost",
+                weaknesses: "Weakness(es)",
+                resistances: "Resistance(s)",
+                retreatCost: "Retreat Cost",
+                effect: "Effect",
+                description: "Description",
+                noCardsFound: "No cards found for this set or applied filters.",
+                errorLoadingCards: "An error occurred while loading cards. Please try again later. Details: ",
+                errorLoadingCardDetails: "Error loading card details.",
+                hp: "HP",
+                types: "Type(s)",
+                category: "Category",
+                noRetreatCost: "None",
+                unavailable: "N/A",
+                imageNotAvailable: "Image not available",
+                detailedImageNotAvailable: "No Detailed Image",
+                finalImageNotAvailable: "Image Unavailable",
+                errorSetNotAvailableInLang: "Data for set '{setId}' not available in {languageName}.",
+                errorCardNotAvailableInLang: "Details for card '{cardId}' not available in {languageName}.",
+                filterTextLabel: "Filter by Text:",
+                filterTextPlaceholder: "Enter card name...",
+                filterSetLabel: "Set:",
+                filterTypeLabel: "Type:",
+                allTypesOption: "All Types",
+                noCardsMatchFilters: "No cards found matching the applied filters.",
+                noSetsFound: "No sets found.",
+                errorLoadingTypes: "Error loading types.",
+                cardsPerPageLabel: "Cards per Page:",
+                allCardsOption: "All",
+                cardSizeLabel: "Card Size:",
+                sizeSmallOption: "Small",
+                sizeMediumOption: "Medium",
+                sizeLargeOption: "Large",
+                loadMoreButton: "Load More"
+            },
+             'es': { // Traduções para Espanhol (exemplo)
+                pageTitle: "PTCGP - Cartas del Set",
+                headerTitle: "Pokémon JCC",
+                loadingSet: "Cartas del Set: Cargando...",
+                loadingCards: "Cargando cartas...",
+                cardsPerPageLabel: "Cartas por Página:",
+                allCardsOption: "Todas",
+                cardSizeLabel: "Tamaño de Cartas:",
+                sizeSmallOption: "Pequeño",
+                sizeMediumOption: "Mediano",
+                sizeLargeOption: "Grande",
+                loadMoreButton: "Cargar Más"
+                // ... outras traduções de 'es'
+            },
+            // ... (outras línguas)
+        };
+
+        function translate(key, replacements = {}) {
+            let translation = translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
+            for (const placeholder in replacements) {
+                translation = translation.replace(`{${placeholder}}`, replacements[placeholder]);
+            }
+            return translation;
+        }
+
+        function getLanguageDisplayName(langCode) {
+            const option = languageSelector.querySelector(`option[value="${langCode}"]`);
+            return option ? option.textContent : langCode;
+        }
+
+        function updateStaticText() {
+            document.documentElement.lang = currentLanguage.split('-')[0]; 
+            document.title = translate('pageTitle');
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.getAttribute('data-translate-key');
+                if (el.tagName === 'INPUT' && el.hasAttribute('data-translate-placeholder')) {
+                    el.placeholder = translate(key); 
+                } else if (el.hasAttribute('data-translate-placeholder') && el.tagName !== 'INPUT') { 
+                     el.setAttribute('placeholder', translate(key));
+                }
+                else if (el.tagName === 'OPTION' && el.value === "all" && key === "allCardsOption"){ 
+                     el.textContent = translate(key);
+                }
+                 else if (el.tagName === 'OPTION' && el.value === "small" && key === "sizeSmallOption"){ 
+                     el.textContent = translate(key);
+                }
+                 else if (el.tagName === 'OPTION' && el.value === "medium" && key === "sizeMediumOption"){ 
+                     el.textContent = translate(key);
+                }
+                 else if (el.tagName === 'OPTION' && el.value === "large" && key === "sizeLargeOption"){ 
+                     el.textContent = translate(key);
+                }
+                else {
+                    el.textContent = translate(key);
+                }
+            });
+            const mainLoadingText = loadingIndicator.querySelector('p');
+            if (mainLoadingText) {
+                mainLoadingText.textContent = translate('loadingCards');
+            }
+            const searchInputEl = document.getElementById('search-input');
+            if (searchInputEl) {
+                searchInputEl.placeholder = translate('filterTextPlaceholder');
+            }
+        }
+
+        // MODIFICADO: energyTypeIcons agora aponta para a pasta local 'ene/'
+        const energyTypeIcons = { 
+            "Grass": "ene/cmn_icn_ene_gra.png",
+            "Fire": "ene/cmn_icn_ene_fir.png",
+            "Water": "ene/cmn_icn_ene_wat.png",
+            "Lightning": "ene/cmn_icn_ene_lig.png",
+            "Psychic": "ene/cmn_icn_ene_psy.png",
+            "Fighting": "ene/cmn_icn_ene_fig.png",
+            "Darkness": "ene/cmn_icn_ene_dar.png",
+            "Metal": "ene/cmn_icn_ene_met.png",
+            "Fairy": "", // Deixar vazio se não houver imagem, ou adicionar "ene/cmn_icn_ene_fai.png" se existir
+            "Dragon": "ene/cmn_icn_ene_dra.png",
+            "Colorless": "ene/cmn_icn_ene_nor.png",
+        };
+
+        function getEnergyIconHTML(type) {
+            const iconUrl = energyTypeIcons[type];
+            const altText = type || translate('unavailable');
+
+            if (!iconUrl) { // Se a URL estiver vazia (ex: Fairy sem imagem)
+                const fallbackSpan = document.createElement('span');
+                fallbackSpan.className = 'energy-text-fallback';
+                fallbackSpan.textContent = `[${altText.substring(0,1)}]`;
+                fallbackSpan.title = altText;
+                return fallbackSpan.outerHTML;
+            }
+
+            const img = document.createElement('img');
+            img.src = iconUrl; // Caminho local
+            img.alt = altText; 
+            img.className = "energy-icon";
+            img.title = altText;
+            
+            img.onerror = function() { // Fallback se a imagem local não carregar
+                const textNode = document.createElement('span');
+                textNode.className = 'energy-text-fallback';
+                textNode.textContent = `[${this.alt.substring(0,1)}]`; // Mostra a primeira letra
+                textNode.title = this.alt;
+                if (this.parentNode) {
+                    this.parentNode.replaceChild(textNode, this);
+                }
+            };
+            return img.outerHTML;
+        }
+
+        function createCardElement(cardData) {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out cursor-pointer';
+
+            const imageContainer = document.createElement('div');
+            imageContainer.className = 'card-image w-full';
+
+            const img = document.createElement('img');
+            const imageUrl = cardData.image ? `${cardData.image}/high.webp` : 'https://placehold.co/240x336/e0e0e0/777777?text=' + translate('imageNotAvailable');
+            const lowResImageUrl = cardData.image ? `${cardData.image}/low.webp` : 'https://placehold.co/240x336/e0e0e0/777777?text=' + translate('imageNotAvailable');
+
+            img.src = imageUrl;
+            img.alt = `[${translate('imageNotAvailable')} ${cardData.name}]`;
+            img.loading = 'lazy';
+            img.className = 'hidden';
+
+            const placeholderSpinner = document.createElement('div');
+            placeholderSpinner.className = 'loading-spinner';
+            imageContainer.appendChild(placeholderSpinner);
+            imageContainer.appendChild(img);
+
+            img.onload = () => {
+                placeholderSpinner.style.display = 'none';
+                img.classList.remove('hidden');
+            };
+            img.onerror = () => {
+                img.src = lowResImageUrl; 
+                img.onerror = () => { 
+                    placeholderSpinner.style.display = 'none';
+                    imageContainer.innerHTML = `<div class="w-full h-full flex items-center justify-center text-gray-500 text-sm p-2">${translate('imageNotAvailable')}</div>`;
+                };
+            };
+
+            const cardContent = document.createElement('div');
+            cardContent.className = 'p-4';
+            const cardName = document.createElement('h3');
+            cardName.className = 'text-lg font-semibold text-gray-800 mb-1 truncate';
+            cardName.textContent = cardData.name; 
+            cardName.title = cardData.name;
+            const cardIdText = document.createElement('p');
+            cardIdText.className = 'text-xs text-gray-500 mb-1';
+            cardIdText.textContent = `${translate('card_id')}: ${cardData.id} ${cardData.localId ? '('+cardData.localId+')' : ''}`;
+            
+            const cardRarityP = document.createElement('p');
+            cardRarityP.className = 'text-sm text-gray-600';
+            cardRarityP.textContent = `${translate('rarity')}: ${cardData.rarity || translate('unavailable')}`;
+
+
+            cardContent.appendChild(cardName);
+            cardContent.appendChild(cardIdText);
+            cardContent.appendChild(cardRarityP);
+
+            cardElement.appendChild(imageContainer);
+            cardElement.appendChild(cardContent);
+
+            cardElement.addEventListener('click', () => fetchAndDisplayCardDetails(cardData.id));
+            return cardElement;
+        }
+
+        function populateModal(cardData) {
+            modalBody.innerHTML = ''; 
+
+            const imgDetail = document.createElement('img');
+            const detailImgSrc = cardData.image ? `${cardData.image}/high.webp` : 'https://placehold.co/300x420/e0e0e0/777777?text=' + translate('detailedImageNotAvailable');
+            imgDetail.src = detailImgSrc;
+            imgDetail.alt = `[${translate('detailedImageNotAvailable')} ${cardData.name}]`;
+            imgDetail.className = 'w-full max-w-xs mx-auto rounded-md shadow-md mb-4';
+            imgDetail.onerror = () => {
+                imgDetail.src = cardData.image ? `${cardData.image}/low.webp` : 'https://placehold.co/300x420/e0e0e0/777777?text=' + translate('detailedImageNotAvailable');
+                imgDetail.onerror = () => { imgDetail.src = 'https://placehold.co/300x420/e0e0e0/777777?text=' + translate('finalImageNotAvailable');};
+            };
+            modalBody.appendChild(imgDetail);
+
+            const nameH = document.createElement('h2');
+            nameH.className = 'text-2xl font-bold text-center mb-2';
+            nameH.textContent = cardData.name; 
+            modalBody.appendChild(nameH);
+
+            let basicInfoHTML = `<p class="text-sm text-gray-600 text-center">`;
+            if (cardData.hp) basicInfoHTML += `${translate('hp')}: ${cardData.hp} | `;
+            if (cardData.types && cardData.types.length > 0) basicInfoHTML += `${translate('types')}: ${cardData.types.join(', ')} | `; 
+            basicInfoHTML += `${translate('category')}: ${cardData.category || translate('unavailable')}</p>`; 
+            modalBody.innerHTML += basicInfoHTML;
+
+            const detailsGrid = document.createElement('div');
+            detailsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3';
+            let detailsHTML = '';
+            if (cardData.rarity) detailsHTML += `<div><strong>${translate('rarity')}:</strong> ${cardData.rarity}</div>`; 
+            if (cardData.illustrator) detailsHTML += `<div><strong>${translate('illustrator')}:</strong> ${cardData.illustrator}</div>`; 
+            if (cardData.set && cardData.set.name) detailsHTML += `<div><strong>${translate('set')}:</strong> ${cardData.set.name} (${cardData.set.id || ''})</div>`; 
+            detailsHTML += `<div><strong>${translate('card_id')}:</strong> ${cardData.id} ${cardData.localId ? '('+cardData.localId+')' : ''}</div>`;
+            if (cardData.evolvesFrom) detailsHTML += `<div><strong>${translate('evolvesFrom')}:</strong> ${cardData.evolvesFrom}</div>`; 
+            if (cardData.regulationMark) detailsHTML += `<div><strong>${translate('regulationMark')}:</strong> ${cardData.regulationMark}</div>`; 
+            detailsGrid.innerHTML = detailsHTML;
+            modalBody.appendChild(detailsGrid);
+            
+            if (cardData.abilities && cardData.abilities.length > 0) {
+                let abilitiesHtml = `<h3 class="text-lg font-semibold mt-4 mb-1">${translate('abilities')}:</h3>`;
+                cardData.abilities.forEach(ability => { 
+                    abilitiesHtml += `<div class="mb-2 p-2 bg-gray-50 rounded-md"><strong>${ability.name} (${ability.type}):</strong> <p class="text-xs">${ability.text}</p></div>`;
+                });
+                modalBody.innerHTML += abilitiesHtml;
+            }
+
+            if (cardData.attacks && cardData.attacks.length > 0) {
+                let attacksHtml = `<h3 class="text-lg font-semibold mt-4 mb-1">${translate('attacks')}:</h3>`;
+                cardData.attacks.forEach(attack => { 
+                    attacksHtml += `<div class="mb-2 p-2 bg-gray-50 rounded-md">`;
+                    attacksHtml += `<div class="flex justify-between items-center">`;
+                    attacksHtml += `  <strong class="text-md">${attack.name}</strong>`;
+                    attacksHtml += `  <span class="text-sm font-semibold">${attack.damage || ''}</span>`;
+                    attacksHtml += `</div>`;
+                    if (attack.cost && attack.cost.length > 0) {
+                         const costHtml = attack.cost.map(c => getEnergyIconHTML(c)).join('');
+                         attacksHtml += `<div class="text-xs my-1">${translate('cost')}: ${costHtml}</div>`;
+                    }
+                    if (attack.effect) attacksHtml += `<p class="text-xs">${attack.effect}</p>`;
+                    attacksHtml += `</div>`;
+                });
+                modalBody.innerHTML += attacksHtml;
+            }
+            
+            let combatStatsHtml = '<div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm mt-4">';
+            let hasCombatStats = false;
+            if (cardData.weaknesses && cardData.weaknesses.length > 0) { 
+                combatStatsHtml += `<div><strong>${translate('weaknesses')}:</strong> ${cardData.weaknesses.map(w => `${w.type} ${w.value}`).join(', ')}</div>`;
+                hasCombatStats = true;
+            }
+            if (cardData.resistances && cardData.resistances.length > 0) { 
+                combatStatsHtml += `<div><strong>${translate('resistances')}:</strong> ${cardData.resistances.map(r => `${r.type} ${r.value}`).join(', ')}</div>`;
+                hasCombatStats = true;
+            }
+
+            if (typeof cardData.retreat === 'number' && cardData.retreat >= 0) {
+                let retreatCostDisplay = '';
+                if (cardData.retreat === 0) {
+                    retreatCostDisplay = translate('noRetreatCost');
+                } else {
+                    for (let i = 0; i < cardData.retreat; i++) {
+                        retreatCostDisplay += getEnergyIconHTML("Colorless");
+                    }
+                }
+                combatStatsHtml += `<div><strong>${translate('retreatCost')}:</strong> ${retreatCostDisplay}</div>`;
+                hasCombatStats = true;
+            } else if (cardData.category === "Pokémon") {
+                combatStatsHtml += `<div><strong>${translate('retreatCost')}:</strong> ${translate('unavailable')}</div>`;
+                hasCombatStats = true;
+            }
+
+            combatStatsHtml += '</div>';
+            if (hasCombatStats) {
+                 modalBody.innerHTML += combatStatsHtml;
+            }
+
+            if (cardData.effect) { 
+                 modalBody.innerHTML += `<h3 class="text-lg font-semibold mt-4 mb-1">${translate('effect')}:</h3><p class="text-sm p-2 bg-gray-50 rounded-md">${cardData.effect}</p>`;
+            }
+            if (cardData.description) { 
+                 modalBody.innerHTML += `<h3 class="text-lg font-semibold mt-4 mb-1">${translate('description')}:</h3><p class="text-sm italic p-2 bg-gray-50 rounded-md">${cardData.description}</p>`;
+            }
+        }
+
+        async function fetchAndDisplayCardDetails(cardId) {
+            modalOverlay.classList.remove('hidden');
+            const modalLoadingText = modalBody.querySelector('span');
+            if (modalLoadingText) modalLoadingText.textContent = translate('modalLoadingDetails');
+
+            const cardApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/cards/${cardId}`;
+            try {
+                const response = await fetch(cardApiUrl);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        modalBody.innerHTML = `<p class="text-red-500 text-center">${translate('errorCardNotAvailableInLang', {cardId: cardId, languageName: getLanguageDisplayName(currentLanguage)})}</p>`;
+                        return; 
+                    }
+                    const statusText = response.statusText || '(No status text provided by server)';
+                    throw new Error(`HTTP error! Status: ${response.status} - ${statusText}`);
+                }
+                const cardData = await response.json();
+                populateModal(cardData);
+            } catch (error) { 
+                console.error(`Falha ao buscar detalhes da carta. URL: ${cardApiUrl}. Erro:`, error);
+                modalBody.innerHTML = `<p class="text-red-500 text-center">${translate('errorLoadingCardDetails')} ${error.message}</p>`;
+            }
+        }
+
+
+        function closeModal() {
+            modalOverlay.classList.add('hidden');
+            modalBody.innerHTML = `<div class="text-center"><div class="loading-spinner inline-block"></div> <span data-translate-key="modalLoadingDetails">${translate("modalLoadingDetails")}</span></div>`;
+        }
+
+        modalCloseButton.addEventListener('click', closeModal);
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                closeModal();
+            }
+        });
+        
+        async function populatePtcgpSetsFilter() {
+            console.log(`[populatePtcgpSetsFilter] Populando filtro de coleções PTCGP com nomes da API.`);
+            setFilter.innerHTML = ''; 
+            const loadingOption = document.createElement('option');
+            loadingOption.textContent = translate('loadingSet').split(':')[0] + '...'; 
+            setFilter.appendChild(loadingOption);
+            setFilter.disabled = true;
+
+            const fetchedSets = [];
+
+            for (const setId of ptcgpSetIdsToShow) {
+                const setApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/sets/${setId}`;
+                try {
+                    const response = await fetch(setApiUrl);
+                    if (response.ok) {
+                        const setData = await response.json();
+                        fetchedSets.push({ id: setData.id, name: `${setData.id} - ${setData.name}` });
+                    } else {
+                        console.warn(`Não foi possível buscar dados para o set ${setId} no idioma ${currentLanguage}. Status: ${response.status}`);
+                        fetchedSets.push({ id: setId, name: `${setId} - (${translate('unavailable')})` });
+                    }
+                } catch (error) {
+                    console.error(`Erro ao buscar dados para o set ${setId}:`, error);
+                    fetchedSets.push({ id: setId, name: `${setId} - (${translate('errorLoadingSets')})` });
+                }
+            }
+
+            setFilter.innerHTML = ''; 
+
+            if (fetchedSets.length === 0) {
+                const noSetsOption = document.createElement('option');
+                noSetsOption.value = ""; 
+                noSetsOption.textContent = translate('noSetsFound'); 
+                setFilter.appendChild(noSetsOption);
+                currentSetId = ""; 
+                setFilter.disabled = false;
+                return; 
+            }
+            
+            fetchedSets.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric: true, sensitivity: 'base'}));
+
+            fetchedSets.forEach(s => { 
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = s.name; 
+                if (s.id === currentSetId) { 
+                    option.selected = true;
+                }
+                setFilter.appendChild(option);
+            });
+            
+            const selectedOptionInFilter = setFilter.querySelector('option:checked');
+            if (selectedOptionInFilter && selectedOptionInFilter.value) {
+                currentSetId = selectedOptionInFilter.value;
+            } else if (fetchedSets.length > 0 && fetchedSets[0].id) { 
+                currentSetId = fetchedSets[0].id;
+                setFilter.value = currentSetId; 
+            } else { 
+                currentSetId = ""; 
+            }
+            setFilter.disabled = false;
+            console.log(`[populatePtcgpSetsFilter] Filtro de coleções PTCGP populado. Selecionado: ${currentSetId}`);
+        }
+
+
+        async function fetchAndPopulateGlobalTypesFilter() {
+            const typesApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/types`;
+            console.log(`[fetchAndPopulateGlobalTypesFilter][${currentLanguage}] Buscando tipos de: ${typesApiUrl}`);
+            typeFilter.innerHTML = `<option value="">${translate('allTypesOption')}</option>`; 
+
+            try {
+                const response = await fetch(typesApiUrl);
+                if (!response.ok) {
+                    console.error(`[fetchAndPopulateGlobalTypesFilter][${currentLanguage}] Erro HTTP: ${response.status}`);
+                    return;
+                }
+                const globalTypes = await response.json(); 
+                
+                if (Array.isArray(globalTypes) && globalTypes.length > 0) {
+                    const sortedTypes = globalTypes
+                        .map(type => typeof type === 'string' ? type.trim() : null)
+                        .filter(type => type) 
+                        .sort((a, b) => a.localeCompare(b, currentLanguage, { sensitivity: 'base' }));
+
+                    sortedTypes.forEach(type => {
+                        const option = document.createElement('option');
+                        option.value = type;
+                        option.textContent = type;
+                        typeFilter.appendChild(option);
+                    });
+                } else {
+                    console.warn(`[fetchAndPopulateGlobalTypesFilter][${currentLanguage}] Nenhum tipo global encontrado ou formato inesperado.`);
+                }
+            } catch (error) {
+                console.error(`[fetchAndPopulateGlobalTypesFilter][${currentLanguage}] Falha ao buscar tipos globais. Erro:`, error);
+            }
+            typeFilter.value = currentSelectedType; 
+            console.log(`[fetchAndPopulateGlobalTypesFilter] Filtro de tipos populado. Opções: ${typeFilter.options.length}, Selecionado: '${typeFilter.value}'`);
+        }
+        
+        function renderCards(cardsToDisplay) {
+            cardsGrid.innerHTML = '';
+            if (cardsToDisplay.length > 0) {
+                cardsToDisplay.forEach(card => {
+                    const cardElement = createCardElement(card); 
+                    cardsGrid.appendChild(cardElement);
+                });
+            } else {
+                if (loadingIndicator.style.display === 'none' ) {
+                     cardsGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">${translate('noCardsFound')}</p>`;
+                }
+            }
+        }
+        
+        async function fetchSetDetails(setId) {
+            const setDetailsApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/sets/${setId}`;
+            const setSymbolApiUrl = `https://assets.tcgdex.net/univ/tcgp/${setId}/symbol.png`; 
+            
+            console.log(`[fetchSetDetails] Buscando detalhes para o set PTCGP: ${setId} de ${setDetailsApiUrl}`);
+            setLogoImg.style.display = 'none'; 
+            setSymbolImg.style.display = 'none';
+
+            try {
+                const response = await fetch(setDetailsApiUrl);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        console.warn(`Detalhes do set '${setId}' (PTCGP) não encontrados na API para '${currentLanguage}'.`);
+                        const selectedOption = Array.from(setFilter.options).find(opt => opt.value === setId);
+                        const nameFromDropdown = selectedOption ? selectedOption.textContent.split(' - ')[1] || setId : setId;
+                        currentSetDetails = { id: setId, name: nameFromDropdown }; 
+                        setNameDisplay.textContent = `${translate('loadingSet').split(':')[0]}: ${currentSetDetails.name}`;
+                    } else {
+                        throw new Error(`HTTP error ${response.status}`);
+                    }
+                } else {
+                    currentSetDetails = await response.json();
+                    if (currentSetDetails && currentSetDetails.name) {
+                        setNameDisplay.textContent = `${translate('loadingSet').split(':')[0]}: ${currentSetDetails.name} (${currentSetDetails.id})`;
+                        const optionInFilter = setFilter.querySelector(`option[value="${setId}"]`);
+                        if (optionInFilter && optionInFilter.textContent !== `${setId} - ${currentSetDetails.name}`) {
+                            optionInFilter.textContent = `${setId} - ${currentSetDetails.name}`;
+                        }
+                    } else if (currentSetDetails) { 
+                         setNameDisplay.textContent = `${translate('loadingSet').split(':')[0]}: ${currentSetDetails.id}`;
+                    }
+
+                    if (currentSetDetails && currentSetDetails.logo) { 
+                        setLogoImg.src = currentSetDetails.logo + '.webp'; 
+                        setLogoImg.alt = `${translate('set')} ${currentSetDetails.name || currentSetDetails.id} - Logo`; 
+                        setLogoImg.onload = () => setLogoImg.style.display = 'inline-block';
+                        setLogoImg.onerror = () => {
+                            console.warn(`Logo para set ${currentSetDetails.id} não encontrado ou falha ao carregar de ${currentSetDetails.logo}.webp`);
+                            setLogoImg.style.display = 'none';
+                        };
+                    } else if (currentSetDetails && currentSetDetails.id) { 
+                         let logoPathForSet = (currentSetDetails.serie && currentSetDetails.serie.id) ? currentSetDetails.serie.id : 'tcgp';
+                         const fallbackLogoUrl = `https://assets.tcgdex.net/${currentLanguage}/${logoPathForSet}/${currentSetDetails.id}/logo.webp`;
+                         setLogoImg.src = fallbackLogoUrl;
+                         setLogoImg.alt = `${translate('set')} ${currentSetDetails.name || currentSetDetails.id} - Logo`;
+                         setLogoImg.onload = () => setLogoImg.style.display = 'inline-block';
+                         setLogoImg.onerror = () => {
+                            console.warn(`Logo para set ${currentSetDetails.id} não encontrado em ${fallbackLogoUrl}`);
+                            setLogoImg.style.display = 'none';
+                        };
+                    }
+                }
+                
+                console.log(`[fetchSetDetails] Tentando carregar símbolo de: ${setSymbolApiUrl}`);
+                setSymbolImg.src = setSymbolApiUrl;
+                setSymbolImg.alt = `${translate('set')} ${currentSetDetails?.name || setId} - Símbolo`;
+                setSymbolImg.onload = () => {
+                    console.log(`[fetchSetDetails] Símbolo para ${setId} carregado com sucesso.`);
+                    setSymbolImg.style.display = 'inline-block';
+                };
+                setSymbolImg.onerror = () => {
+                    console.warn(`Símbolo para set ${setId} não encontrado em ${setSymbolApiUrl} ou falha ao carregar.`);
+                    setSymbolImg.style.display = 'none';
+                };
+                return currentSetDetails;
+            } catch (error) {
+                console.error(`Falha ao buscar detalhes do set '${setId}'. Erro:`, error);
+                const selectedOption = Array.from(setFilter.options).find(opt => opt.value === setId);
+                const nameFromDropdown = selectedOption ? selectedOption.textContent.split(' - ')[1] || setId : setId;
+                setNameDisplay.textContent = `${translate('loadingSet').split(':')[0]}: ${nameFromDropdown}`;
+                currentSetDetails = { id: setId, name: nameFromDropdown }; 
+                
+                console.log(`[fetchSetDetails - CATCH] Tentando carregar símbolo de: ${setSymbolApiUrl}`);
+                setSymbolImg.src = setSymbolApiUrl;
+                setSymbolImg.alt = `${translate('set')} ${nameFromDropdown} - Símbolo`;
+                setSymbolImg.onload = () => setSymbolImg.style.display = 'inline-block';
+                setSymbolImg.onerror = () => setSymbolImg.style.display = 'none';
+                return null;
+            }
+        }
+
+        async function fetchAndDisplayCards() {
+            if (!currentSetId) {
+                cardsGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">${translate('noSetsFound')}</p>`;
+                if(!currentSetDetails && setFilter.value === "") { 
+                    setNameDisplay.textContent = translate('noSetsFound'); 
+                    setLogoImg.style.display = 'none';
+                    setSymbolImg.style.display = 'none';
+                }
+                allFetchedAndDetailedCards = []; 
+                currentlyDisplayedCards = [];
+                renderCards([]); 
+                loadMoreContainer.style.display = 'none';
+                loadingIndicator.style.display = 'none';
+                return;
+            }
+           
+            if (!currentSetDetails || currentSetDetails.id !== currentSetId || currentPage === 1) {
+                if (!currentSetDetails || currentSetDetails.id !== currentSetId) {
+                    await fetchSetDetails(currentSetId); 
+                }
+            } else if (currentSetDetails) { 
+                 const displayName = currentSetDetails.name || currentSetId;
+                 const displayId = (currentSetDetails.id && displayName.indexOf(currentSetDetails.id) === -1) ? `(${currentSetDetails.id})` : '';
+                 setNameDisplay.textContent = `${translate('loadingSet').split(':')[0]}: ${displayName} ${displayId}`;
+            }
+
+            loadingIndicator.style.display = 'flex';
+            if (currentPage === 1) { 
+                cardsGrid.innerHTML = ''; 
+                currentlyDisplayedCards = []; 
+                allFetchedAndDetailedCards = []; // Limpa a lista principal ao mudar filtros ou set
+            }
+
+            if (currentPage === 1 || allFetchedAndDetailedCards.length === 0) {
+                // MODIFICADO: URL de busca de cartas voltando a usar /cards?set.id=${currentSetId} e &serie.id=tcgp
+                let cardsApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/cards?set.id=${currentSetId}`;
+                 // Adicionar o filtro de série aqui é importante para garantir que pegamos os sets do PTCGP
+                 // já que IDs como "A1" podem existir em outras séries.
+                // No entanto, a TCGdex API pode não suportar `serie.id` como filtro direto no endpoint /cards.
+                // Vamos tentar com `set.id` primeiro, e o filtro estrito `card.id.startsWith` cuidará do resto.
+                // Se for confirmado que `/cards?serie.id=tcgp&set.id=A1` funciona e retorna dados com 'types', seria ideal.
+                // Por agora, mantemos o foco no set.id e filtro cliente estrito.
+
+
+                if (currentSearchTerm) { 
+                    cardsApiUrl += `&name=${encodeURIComponent(currentSearchTerm)}*`; 
+                }
+                // O filtro de tipo é removido da URL da API
+                console.log(`[fetchAndDisplayCards] Buscando TODAS as cartas de: ${cardsApiUrl} para popular 'allFetchedAndDetailedCards'`);
+
+                let cardsFromApi = []; 
+                try {
+                    const response = await fetch(cardsApiUrl);
+                    if (!response.ok) {
+                        if (response.status === 404) console.log(`[fetchAndDisplayCards] Nenhum card encontrado pela API para URL: ${cardsApiUrl}`);
+                        else throw new Error(`HTTP error! Status: ${response.status}`);
+                    } else {
+                        const responseData = await response.json();
+                        if (Array.isArray(responseData)) cardsFromApi = responseData;
+                        else if (responseData && Array.isArray(responseData.data)) cardsFromApi = responseData.data;
+                        else console.warn("Formato de resposta inesperado para /cards:", responseData);
+                    }
+                    
+                    allFetchedAndDetailedCards = cardsFromApi.filter(card => 
+                        card.id && card.id.startsWith(currentSetId + '-')
+                    );
+                    console.log(`[fetchAndDisplayCards] 'allFetchedAndDetailedCards' populado com ${allFetchedAndDetailedCards.length} cartas (após filtro estrito de set '${currentSetId}').`);
+
+                    // IMPORTANTE: Verificar se allFetchedAndDetailedCards agora contém 'types'
+                    if (allFetchedAndDetailedCards.length > 0 && !allFetchedAndDetailedCards[0].types) {
+                        console.warn(`[fetchAndDisplayCards] Cartas de ${cardsApiUrl} NÃO contêm a propriedade 'types'. Filtro de tipo não funcionará.`);
+                        // Se não contiver 'types', a etapa de enriquecimento anterior seria necessária aqui.
+                        // No entanto, para simplificar e seguir a tentativa atual, vamos prosseguir e ver o log do filtro de tipo.
+                    }
+
+
+                } catch (error) { 
+                    console.error(`Falha ao buscar ou processar cartas. URL: ${cardsApiUrl}. Erro:`, error);
+                    cardsGrid.innerHTML = `<p class="text-center text-red-500 col-span-full">${translate('errorLoadingCards')} ${error.message}</p>`;
+                    allFetchedAndDetailedCards = []; 
+                }
+            }
+
+            let cardsToFilter = [...allFetchedAndDetailedCards]; // Começa com todas as cartas carregadas para o set
+
+            // Filtro de tipo APLICADO NO CLIENTE
+            if (currentSelectedType) {
+                console.log(`[fetchAndDisplayCards] Aplicando filtro de tipo cliente: '${currentSelectedType}' em ${cardsToFilter.length} cartas.`);
+                
+                if(cardsToFilter.length > 0) {
+                    const sampleSize = Math.min(cardsToFilter.length, 5);
+                    console.log(`[TypeFilterDebug] Amostra de ${sampleSize} cartas ANTES do filtro de tipo. currentSelectedType: '${currentSelectedType}'`);
+                    for(let i = 0; i < sampleSize; i++) {
+                        const card = cardsToFilter[i];
+                        // Adiciona log para a propriedade types de cada carta na amostra
+                        console.log(`  [TypeFilterDebug] Card ${i}: ID=${card.id}, Name=${card.name}, Types=${JSON.stringify(card.types)}`);
+                    }
+                }
+
+                cardsToFilter = cardsToFilter.filter((card, index) => {
+                    const hasTypesProperty = card.types && Array.isArray(card.types);
+                    if (!hasTypesProperty) {
+                        // Este log é importante para ver se 'types' está faltando
+                        if (index < 10) console.log(`  [TypeFilterDebug - FALHA] Card ${card.id} (${card.name}) não possui 'types' array ou é undefined. Valor de card.types: ${JSON.stringify(card.types)}`);
+                        return false;
+                    }
+                    const typeMatch = card.types.includes(currentSelectedType);
+                    // Log para ver quais cartas estão sendo filtradas (ou mantidas) pelo tipo
+                    // if (index < 10 && !typeMatch) console.log(`  [TypeFilterDebug - NÃO INCLUI] Card ${card.id} tipos ${JSON.stringify(card.types)} NÃO incluem '${currentSelectedType}'`);
+                    // if (index < 10 && typeMatch) console.log(`  [TypeFilterDebug - INCLUI] Card ${card.id} tipos ${JSON.stringify(card.types)} INCLUEM '${currentSelectedType}'`);
+                    return typeMatch;
+                });
+                console.log(`[fetchAndDisplayCards] Cartas após filtro de tipo cliente: ${cardsToFilter.length}`);
+            }
+            
+            // Paginação sobre a lista já filtrada por tipo e nome (nome pela API, tipo pelo cliente)
+            let cardsForCurrentPage;
+            if (cardsPerPage === 'all') {
+                cardsForCurrentPage = cardsToFilter;
+                loadMoreContainer.style.display = 'none';
+            } else {
+                const numericCardsPerPage = parseInt(cardsPerPage);
+                const startIndex = (currentPage - 1) * numericCardsPerPage;
+                const endIndex = startIndex + numericCardsPerPage;
+                cardsForCurrentPage = cardsToFilter.slice(startIndex, endIndex);
+                
+                if (currentPage === 1) {
+                    currentlyDisplayedCards = cardsForCurrentPage;
+                } else {
+                    currentlyDisplayedCards.push(...cardsForCurrentPage); 
+                }
+                
+                if (currentlyDisplayedCards.length < cardsToFilter.length) {
+                    loadMoreContainer.style.display = 'block';
+                } else {
+                    loadMoreContainer.style.display = 'none';
+                }
+            }
+            
+            if (cardsPerPage === 'all') {
+                currentlyDisplayedCards = cardsToFilter;
+            }
+
+            renderCards(currentlyDisplayedCards);
+            loadingIndicator.style.display = 'none';
+        }
+
+        async function handleSetChange() {
+            console.log("Set mudou para:", currentSetId);
+            currentSearchTerm = ''; 
+            searchInput.value = '';
+            currentSelectedType = ''; 
+            typeFilter.value = ''; 
+            currentPage = 1; 
+            allFetchedAndDetailedCards = []; 
+            currentlyDisplayedCards = []; 
+
+            if (!currentSetId) { 
+                currentSetDetails = null; 
+                setNameDisplay.textContent = translate('noSetsFound');
+                setLogoImg.style.display = 'none';
+                setSymbolImg.style.display = 'none';
+                await fetchAndDisplayCards(); 
+                return;
+            }
+            
+            await fetchSetDetails(currentSetId); 
+            await fetchAndDisplayCards(); 
+        }
+        
+        searchInput.addEventListener('input', (e) => {
+            currentSearchTerm = e.target.value;
+            currentPage = 1; 
+            allFetchedAndDetailedCards = []; 
+            currentlyDisplayedCards = [];
+            fetchAndDisplayCards(); 
+        });
+
+        typeFilter.addEventListener('change', (e) => {
+            currentSelectedType = e.target.value;
+            currentPage = 1; 
+            currentlyDisplayedCards = []; 
+            // Não precisa limpar allFetchedAndDetailedCards aqui, pois ele já contém todas as cartas do set
+            // Apenas re-filtra e re-pagina a partir dessa lista.
+            fetchAndDisplayCards(); 
+        });
+
+        cardsPerPageFilter.addEventListener('change', function() {
+            cardsPerPage = this.value === 'all' ? 'all' : parseInt(this.value);
+            currentPage = 1; 
+            currentlyDisplayedCards = []; 
+            fetchAndDisplayCards();
+        });
+
+        cardSizeFilter.addEventListener('change', function() {
+            currentCardSize = this.value;
+            const grid = document.getElementById('cards-grid');
+            grid.classList.remove('sm:grid-cols-1', 'sm:grid-cols-2', 'sm:grid-cols-3', 'sm:grid-cols-4');
+            grid.classList.remove('md:grid-cols-2', 'md:grid-cols-3', 'md:grid-cols-4', 'md:grid-cols-5');
+            grid.classList.remove('lg:grid-cols-3', 'lg:grid-cols-4', 'lg:grid-cols-5', 'lg:grid-cols-6');
+            grid.classList.remove('xl:grid-cols-4', 'xl:grid-cols-5', 'xl:grid-cols-7');
+
+            if (currentCardSize === 'small') {
+                grid.classList.add('sm:grid-cols-3', 'md:grid-cols-4', 'lg:grid-cols-5', 'xl:grid-cols-7');
+            } else if (currentCardSize === 'large') {
+                grid.classList.add('sm:grid-cols-1', 'md:grid-cols-2', 'lg:grid-cols-3', 'xl:grid-cols-4');
+            } else { // Medium (default)
+                grid.classList.add('sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'xl:grid-cols-5');
+            }
+        });
+        
+        loadMoreBtn.addEventListener('click', () => {
+            currentPage++;
+            fetchAndDisplayCards(); 
+        });
+
+
+        setFilter.addEventListener('change', async (e) => {
+            currentSetId = e.target.value;
+            await handleSetChange(); 
+        });
+        
+        languageSelector.addEventListener('change', async function() { 
+            const newLang = this.value;
+            if (newLang !== currentLanguage) {
+                currentLanguage = newLang;
+                localStorage.setItem('ptcgpLang', currentLanguage); 
+                
+                updateStaticText(); 
+                
+                const previouslySelectedSetId = currentSetId;
+
+                await populatePtcgpSetsFilter(); 
+                await fetchAndPopulateGlobalTypesFilter(); 
+
+                const setExistsInStaticList = Array.from(setFilter.options).some(opt => opt.value === previouslySelectedSetId);
+                if (setExistsInStaticList) {
+                    currentSetId = previouslySelectedSetId;
+                    setFilter.value = currentSetId;
+                } else {
+                    currentSetId = setFilter.value; 
+                }
+                
+                currentPage = 1; 
+                allFetchedAndDetailedCards = []; 
+                currentlyDisplayedCards = [];
+                currentSelectedType = ''; 
+                typeFilter.value = ''; 
+                currentSearchTerm = ''; 
+                searchInput.value = '';
+
+                await handleSetChange(); 
+                                
+                if (!modalOverlay.classList.contains('hidden')) { 
+                    closeModal(); 
+                }
+            }
+        });
+        
+        async function initializeApp() {
+            const savedLang = localStorage.getItem('ptcgpLang');
+            if (savedLang && translations[savedLang]) {
+                currentLanguage = savedLang;
+                languageSelector.value = savedLang;
+            }
+            cardSizeFilter.dispatchEvent(new Event('change')); 
+            
+            updateStaticText(); 
+            
+            await populatePtcgpSetsFilter(); 
+            await fetchAndPopulateGlobalTypesFilter(); 
+            
+            if (!setFilter.value && defaultSetId) {
+                currentSetId = defaultSetId; 
+                const defaultOptionExists = Array.from(setFilter.options).some(opt => opt.value === defaultSetId);
+                if (defaultOptionExists) {
+                    setFilter.value = defaultSetId; 
+                } else if (setFilter.options.length > 0) { 
+                    currentSetId = setFilter.options[0].value; 
+                    setFilter.value = currentSetId;
+                } else { 
+                    currentSetId = "";
+                }
+            } else {
+                 currentSetId = setFilter.value; 
+            }
+            
+            if (!currentSetId) { 
+                console.warn("Nenhum Set ID inicial definido. A aplicação pode não carregar cartas inicialmente.");
+            }
+
+            cardsPerPage = cardsPerPageFilter.value === 'all' ? 'all' : parseInt(cardsPerPageFilter.value);
+            currentPage = 1; 
+            allFetchedAndDetailedCards = [];
+            currentlyDisplayedCards = [];
+            currentSelectedType = ''; 
+            currentSearchTerm = '';
+            
+            await handleSetChange(); 
+        }
+
+        initializeApp();
+    </script>
+</body>
+</html>
