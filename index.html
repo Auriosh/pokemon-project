@@ -79,7 +79,7 @@
         .energy-icon, .rarity-icon { 
             width: 20px;
             height: 20px;
-            margin-right: 4px;
+            margin-right: 2px; /* Reduzido para ícones repetidos ficarem mais juntos */
             vertical-align: middle; 
             display: inline-block; 
         }
@@ -463,52 +463,37 @@
             "Colorless": "ene/cmn_icn_ene_nor.png",
         };
 
-        // MODIFICADO: Mapeamento de raridades para ícones locais
+        // MODIFICADO: Mapeamento de raridades para ícones locais e contagem de repetição
         const rarityIcons = {
-            // English Keys
-            "Common": "rarity/cmn_icn_rarity_01.png",
-            "Uncommon": "rarity/cmn_icn_rarity_01.png", 
-            "Rare": "rarity/cmn_icn_rarity_02.png",
-            "Rare Holo": "rarity/cmn_icn_rarity_03.png", 
-            "Double Rare": "rarity/cmn_icn_rarity_03.png", 
-            "Rare Holo V": "rarity/cmn_icn_rarity_03.png",
-            "Rare Holo VMAX": "rarity/cmn_icn_rarity_03.png",
-            "Rare Holo VSTAR": "rarity/cmn_icn_rarity_03.png",
-            "Ultra Rare": "rarity/cmn_icn_rarity_03.png", 
-            "Amazing Rare": "rarity/cmn_icn_rarity_04.png",
-            "Secret Rare": "rarity/cmn_icn_rarity_04.png",
-            "Hyper Rare": "rarity/cmn_icn_rarity_04.png", 
-            "Rainbow Rare": "rarity/cmn_icn_rarity_04.png",
-            "Shiny Rare": "rarity/cmn_icn_rarity_04.png",
-            "Promo": "rarity/cmn_icn_rarity_02.png", 
-            "Radiant Rare": "rarity/cmn_icn_rarity_03.png", 
-            "Illustration Rare": "rarity/cmn_icn_rarity_03.png", // Suposição, pode ser _04
-            "Special Illustration Rare": "rarity/cmn_icn_rarity_04.png",
-            "Trainer Gallery Holo": "rarity/cmn_icn_rarity_03.png",
-            "Trainer Gallery Full Art": "rarity/cmn_icn_rarity_03.png",
-            "Trainer Gallery Character Rare": "rarity/cmn_icn_rarity_03.png",
-            "Trainer Gallery Character Super Rare": "rarity/cmn_icn_rarity_04.png",
+            // English API Keys - Mapeamento para os nomes da sua imagem "image_aa8e5c.png"
+            // As chaves aqui devem corresponder exatamente às strings de raridade que a API TCGdex retorna.
+            // Este é um mapeamento inicial e pode precisar de ajustes após verificar os dados reais da API.
+            "One Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },
+            "Two Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },
+            "Three Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 3 },
+            "Four Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 4 },
+            "One Star": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },
+            "Two Star": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 },
+            "Three Star": { path: "rarity/cmn_icn_rarity_02.png", repeat: 3 },
+            "Crown": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },
+            "One Shiny": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 },
+            "Two Shiny": { path: "rarity/cmn_icn_rarity_04.png", repeat: 2 },
 
-            // Portuguese Keys (exemplos, adicionar mais conforme necessário)
-            "Comum": "rarity/cmn_icn_rarity_01.png",
-            "Incomum": "rarity/cmn_icn_rarity_01.png",
-            "Rara": "rarity/cmn_icn_rarity_02.png",
-            "Rara Holográfica": "rarity/cmn_icn_rarity_03.png",
-            "Rara Dupla": "rarity/cmn_icn_rarity_03.png",
-            "Rara Holográfica V": "rarity/cmn_icn_rarity_03.png",
-            "Rara Holográfica VMAX": "rarity/cmn_icn_rarity_03.png",
-            "Rara Holográfica V-ASTRO": "rarity/cmn_icn_rarity_03.png", // Ajustar se necessário para VSTAR
-            "Ultra Rara": "rarity/cmn_icn_rarity_03.png",
-            "Rara Incrível": "rarity/cmn_icn_rarity_04.png",
-            "Rara Secreta": "rarity/cmn_icn_rarity_04.png",
-            "Hyper Rara": "rarity/cmn_icn_rarity_04.png",
-            "Rara Arco-íris": "rarity/cmn_icn_rarity_04.png",
-            "Rara Brilhante": "rarity/cmn_icn_rarity_04.png",
-            "Promocional": "rarity/cmn_icn_rarity_02.png",
-            "Radiante Rara": "rarity/cmn_icn_rarity_03.png",
-            "Rara Ilustrada": "rarity/cmn_icn_rarity_03.png",
-            "Ilustração Rara Especial": "rarity/cmn_icn_rarity_04.png",
-            // Adicione outras raridades específicas de PTCGP ou outros idiomas aqui
+            // Mapeamento Genérico (caso os nomes acima não sejam os da API TCGdex)
+            // Estes são os nomes que eu tinha mapeado antes, que são mais comuns na API TCGdex.
+            // Se a API retornar estas strings, os ícones correspondentes da sua imagem serão usados.
+            "Common": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },      // Losango
+            "Uncommon": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },    // 2 Losangos (exemplo)
+            "Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },        // 1 Estrela
+            "Rare Holo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 },   // 2 Estrelas (exemplo)
+            "Double Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 }, // 2 Estrelas
+            "Ultra Rare": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },  // 1 Coroa
+            "Secret Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 }, // 1 Estrela Brilhante
+            "Hyper Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 2 },  // 2 Estrelas Brilhantes (exemplo)
+            "Promo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },       // 1 Estrela (exemplo para Promo)
+
+            // Adicionar traduções se a API retornar raridades localizadas e você quiser mapeá-las.
+            // Ex: "Comum": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },
         };
 
 
@@ -542,28 +527,38 @@
             return img.outerHTML;
         }
 
+        // MODIFICADO: Função para obter o HTML do ícone de raridade, com repetição
         function getRarityIconHTML(rarityString) {
             if (!rarityString) return `<span class="rarity-text-fallback">${translate('unavailable')}</span>`;
 
-            const iconPath = rarityIcons[rarityString]; // Tenta encontrar o ícone com a string da raridade
-            if (iconPath) {
-                const img = document.createElement('img');
-                img.src = iconPath;
-                img.alt = rarityString;
-                img.title = rarityString;
-                img.className = "rarity-icon"; 
-                
-                img.onerror = function() { 
-                    const textNode = document.createElement('span');
-                    textNode.className = 'rarity-text-fallback';
-                    textNode.textContent = rarityString; 
-                    if (this.parentNode) {
-                        this.parentNode.replaceChild(textNode, this);
-                    }
-                };
-                return img.outerHTML;
+            const rarityInfo = rarityIcons[rarityString]; 
+            
+            if (rarityInfo && rarityInfo.path && rarityInfo.repeat > 0) {
+                let iconsHtml = "";
+                for (let i = 0; i < rarityInfo.repeat; i++) {
+                    const img = document.createElement('img');
+                    img.src = rarityInfo.path;
+                    img.alt = rarityString;
+                    img.title = rarityString; // O title pode mostrar a string completa da raridade
+                    img.className = "rarity-icon"; 
+                    
+                    // O onerror pode ser simplificado, pois se um falhar, os outros provavelmente também.
+                    // Ou pode ter um fallback mais complexo se necessário.
+                    img.onerror = function() { 
+                        const textNode = document.createElement('span');
+                        textNode.className = 'rarity-text-fallback';
+                        // Se a imagem falhar, mostra o texto da raridade em vez de múltiplos [R]
+                        textNode.textContent = rarityString; 
+                        // Substitui todos os ícones planejados pelo texto se um falhar, para evitar mistura.
+                        if (this.parentNode) {
+                            this.parentNode.innerHTML = `<span class="rarity-text-fallback">${rarityString}</span>`;
+                        }
+                    };
+                    iconsHtml += img.outerHTML;
+                }
+                return iconsHtml;
             }
-            // Se a raridade não estiver mapeada, exibe o texto da raridade
+            // Fallback se a raridade não estiver mapeada ou não tiver ícone, mostra o texto da raridade.
             return `<span class="rarity-text-fallback">${rarityString}</span>`;
         }
 
@@ -613,6 +608,8 @@
             
             const cardRarityP = document.createElement('p');
             cardRarityP.className = 'text-sm text-gray-600 flex items-center'; 
+            // Log para depurar qual valor de raridade está sendo passado
+            // console.log(`Card: ${cardData.name}, Rarity from API: '${cardData.rarity}'`); 
             cardRarityP.innerHTML = `${translate('rarity')}: ${getRarityIconHTML(cardData.rarity)}`;
 
 
@@ -1020,11 +1017,10 @@
                     );
                     console.log(`[fetchAndDisplayCards] 'allFetchedAndDetailedCards' populado com ${allFetchedAndDetailedCards.length} cartas (após filtro estrito de set '${currentSetId}').`);
 
-                    // Log para verificar se 'types' está presente nas cartas de allFetchedAndDetailedCards
                     if (allFetchedAndDetailedCards.length > 0) {
                         console.log(`[fetchAndDisplayCards - Pós-Filtro-Estrito] Amostra da primeira carta em allFetchedAndDetailedCards: ID=${allFetchedAndDetailedCards[0].id}, Name=${allFetchedAndDetailedCards[0].name}, Types=${JSON.stringify(allFetchedAndDetailedCards[0].types)}, Rarity=${allFetchedAndDetailedCards[0].rarity}`);
                         if (!allFetchedAndDetailedCards[0].types) {
-                             console.warn(`[fetchAndDisplayCards] ATENÇÃO: A primeira carta em allFetchedAndDetailedCards NÃO possui a propriedade 'types'. O filtro de tipo pode não funcionar.`);
+                             console.warn(`[fetchAndDisplayCards] ATENÇÃO: A primeira carta em allFetchedAndDetailedCards NÃO possui a propriedade 'types'. O filtro de tipo pode não funcionar como esperado, pois depende dessa propriedade.`);
                         }
                     }
 
@@ -1052,8 +1048,7 @@
 
                 cardsToFilter = cardsToFilter.filter((card, index) => {
                     const hasTypesProperty = card.types && Array.isArray(card.types);
-                    // Log se a propriedade types não existir ou não for um array
-                    if (!hasTypesProperty && index < 20) { // Loga para as primeiras 20 cartas que falharem na verificação
+                    if (!hasTypesProperty && index < 20) { 
                         console.log(`  [TypeFilterDebug - CHECK FALHOU] Card ${card.id} (${card.name}) - hasTypesProperty: ${hasTypesProperty}, card.types: ${JSON.stringify(card.types)}`);
                     }
                     if (!hasTypesProperty) return false;
