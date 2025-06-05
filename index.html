@@ -76,14 +76,14 @@
         .modal-close-btn:hover {
             background-color: #dc2626;
         }
-        .energy-icon {
+        .energy-icon, .rarity-icon { 
             width: 20px;
             height: 20px;
             margin-right: 4px;
             vertical-align: middle; 
             display: inline-block; 
         }
-        .energy-text-fallback {
+        .energy-text-fallback, .rarity-text-fallback { 
             font-size: 0.75rem;
             padding: 0.1rem 0.25rem;
             border: 1px solid #ccc;
@@ -449,7 +449,6 @@
             }
         }
 
-        // MODIFICADO: energyTypeIcons agora aponta para a pasta local 'ene/'
         const energyTypeIcons = { 
             "Grass": "ene/cmn_icn_ene_gra.png",
             "Fire": "ene/cmn_icn_ene_fir.png",
@@ -459,16 +458,65 @@
             "Fighting": "ene/cmn_icn_ene_fig.png",
             "Darkness": "ene/cmn_icn_ene_dar.png",
             "Metal": "ene/cmn_icn_ene_met.png",
-            "Fairy": "", // Deixar vazio se não houver imagem, ou adicionar "ene/cmn_icn_ene_fai.png" se existir
+            "Fairy": "", 
             "Dragon": "ene/cmn_icn_ene_dra.png",
             "Colorless": "ene/cmn_icn_ene_nor.png",
         };
+
+        // MODIFICADO: Mapeamento de raridades para ícones locais
+        const rarityIcons = {
+            // English Keys
+            "Common": "rarity/cmn_icn_rarity_01.png",
+            "Uncommon": "rarity/cmn_icn_rarity_01.png", 
+            "Rare": "rarity/cmn_icn_rarity_02.png",
+            "Rare Holo": "rarity/cmn_icn_rarity_03.png", 
+            "Double Rare": "rarity/cmn_icn_rarity_03.png", 
+            "Rare Holo V": "rarity/cmn_icn_rarity_03.png",
+            "Rare Holo VMAX": "rarity/cmn_icn_rarity_03.png",
+            "Rare Holo VSTAR": "rarity/cmn_icn_rarity_03.png",
+            "Ultra Rare": "rarity/cmn_icn_rarity_03.png", 
+            "Amazing Rare": "rarity/cmn_icn_rarity_04.png",
+            "Secret Rare": "rarity/cmn_icn_rarity_04.png",
+            "Hyper Rare": "rarity/cmn_icn_rarity_04.png", 
+            "Rainbow Rare": "rarity/cmn_icn_rarity_04.png",
+            "Shiny Rare": "rarity/cmn_icn_rarity_04.png",
+            "Promo": "rarity/cmn_icn_rarity_02.png", 
+            "Radiant Rare": "rarity/cmn_icn_rarity_03.png", 
+            "Illustration Rare": "rarity/cmn_icn_rarity_03.png", // Suposição, pode ser _04
+            "Special Illustration Rare": "rarity/cmn_icn_rarity_04.png",
+            "Trainer Gallery Holo": "rarity/cmn_icn_rarity_03.png",
+            "Trainer Gallery Full Art": "rarity/cmn_icn_rarity_03.png",
+            "Trainer Gallery Character Rare": "rarity/cmn_icn_rarity_03.png",
+            "Trainer Gallery Character Super Rare": "rarity/cmn_icn_rarity_04.png",
+
+            // Portuguese Keys (exemplos, adicionar mais conforme necessário)
+            "Comum": "rarity/cmn_icn_rarity_01.png",
+            "Incomum": "rarity/cmn_icn_rarity_01.png",
+            "Rara": "rarity/cmn_icn_rarity_02.png",
+            "Rara Holográfica": "rarity/cmn_icn_rarity_03.png",
+            "Rara Dupla": "rarity/cmn_icn_rarity_03.png",
+            "Rara Holográfica V": "rarity/cmn_icn_rarity_03.png",
+            "Rara Holográfica VMAX": "rarity/cmn_icn_rarity_03.png",
+            "Rara Holográfica V-ASTRO": "rarity/cmn_icn_rarity_03.png", // Ajustar se necessário para VSTAR
+            "Ultra Rara": "rarity/cmn_icn_rarity_03.png",
+            "Rara Incrível": "rarity/cmn_icn_rarity_04.png",
+            "Rara Secreta": "rarity/cmn_icn_rarity_04.png",
+            "Hyper Rara": "rarity/cmn_icn_rarity_04.png",
+            "Rara Arco-íris": "rarity/cmn_icn_rarity_04.png",
+            "Rara Brilhante": "rarity/cmn_icn_rarity_04.png",
+            "Promocional": "rarity/cmn_icn_rarity_02.png",
+            "Radiante Rara": "rarity/cmn_icn_rarity_03.png",
+            "Rara Ilustrada": "rarity/cmn_icn_rarity_03.png",
+            "Ilustração Rara Especial": "rarity/cmn_icn_rarity_04.png",
+            // Adicione outras raridades específicas de PTCGP ou outros idiomas aqui
+        };
+
 
         function getEnergyIconHTML(type) {
             const iconUrl = energyTypeIcons[type];
             const altText = type || translate('unavailable');
 
-            if (!iconUrl) { // Se a URL estiver vazia (ex: Fairy sem imagem)
+            if (!iconUrl) { 
                 const fallbackSpan = document.createElement('span');
                 fallbackSpan.className = 'energy-text-fallback';
                 fallbackSpan.textContent = `[${altText.substring(0,1)}]`;
@@ -477,15 +525,15 @@
             }
 
             const img = document.createElement('img');
-            img.src = iconUrl; // Caminho local
+            img.src = iconUrl; 
             img.alt = altText; 
             img.className = "energy-icon";
             img.title = altText;
             
-            img.onerror = function() { // Fallback se a imagem local não carregar
+            img.onerror = function() { 
                 const textNode = document.createElement('span');
                 textNode.className = 'energy-text-fallback';
-                textNode.textContent = `[${this.alt.substring(0,1)}]`; // Mostra a primeira letra
+                textNode.textContent = `[${this.alt.substring(0,1)}]`; 
                 textNode.title = this.alt;
                 if (this.parentNode) {
                     this.parentNode.replaceChild(textNode, this);
@@ -493,6 +541,32 @@
             };
             return img.outerHTML;
         }
+
+        function getRarityIconHTML(rarityString) {
+            if (!rarityString) return `<span class="rarity-text-fallback">${translate('unavailable')}</span>`;
+
+            const iconPath = rarityIcons[rarityString]; // Tenta encontrar o ícone com a string da raridade
+            if (iconPath) {
+                const img = document.createElement('img');
+                img.src = iconPath;
+                img.alt = rarityString;
+                img.title = rarityString;
+                img.className = "rarity-icon"; 
+                
+                img.onerror = function() { 
+                    const textNode = document.createElement('span');
+                    textNode.className = 'rarity-text-fallback';
+                    textNode.textContent = rarityString; 
+                    if (this.parentNode) {
+                        this.parentNode.replaceChild(textNode, this);
+                    }
+                };
+                return img.outerHTML;
+            }
+            // Se a raridade não estiver mapeada, exibe o texto da raridade
+            return `<span class="rarity-text-fallback">${rarityString}</span>`;
+        }
+
 
         function createCardElement(cardData) {
             const cardElement = document.createElement('div');
@@ -538,8 +612,8 @@
             cardIdText.textContent = `${translate('card_id')}: ${cardData.id} ${cardData.localId ? '('+cardData.localId+')' : ''}`;
             
             const cardRarityP = document.createElement('p');
-            cardRarityP.className = 'text-sm text-gray-600';
-            cardRarityP.textContent = `${translate('rarity')}: ${cardData.rarity || translate('unavailable')}`;
+            cardRarityP.className = 'text-sm text-gray-600 flex items-center'; 
+            cardRarityP.innerHTML = `${translate('rarity')}: ${getRarityIconHTML(cardData.rarity)}`;
 
 
             cardContent.appendChild(cardName);
@@ -581,7 +655,7 @@
             const detailsGrid = document.createElement('div');
             detailsGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm mt-3';
             let detailsHTML = '';
-            if (cardData.rarity) detailsHTML += `<div><strong>${translate('rarity')}:</strong> ${cardData.rarity}</div>`; 
+            if (cardData.rarity) detailsHTML += `<div class="flex items-center"><strong>${translate('rarity')}:</strong><span class="ml-1">${getRarityIconHTML(cardData.rarity)}</span></div>`; 
             if (cardData.illustrator) detailsHTML += `<div><strong>${translate('illustrator')}:</strong> ${cardData.illustrator}</div>`; 
             if (cardData.set && cardData.set.name) detailsHTML += `<div><strong>${translate('set')}:</strong> ${cardData.set.name} (${cardData.set.id || ''})</div>`; 
             detailsHTML += `<div><strong>${translate('card_id')}:</strong> ${cardData.id} ${cardData.localId ? '('+cardData.localId+')' : ''}</div>`;
@@ -918,24 +992,14 @@
             if (currentPage === 1) { 
                 cardsGrid.innerHTML = ''; 
                 currentlyDisplayedCards = []; 
-                allFetchedAndDetailedCards = []; // Limpa a lista principal ao mudar filtros ou set
+                allFetchedAndDetailedCards = []; 
             }
 
             if (currentPage === 1 || allFetchedAndDetailedCards.length === 0) {
-                // MODIFICADO: URL de busca de cartas voltando a usar /cards?set.id=${currentSetId} e &serie.id=tcgp
                 let cardsApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/cards?set.id=${currentSetId}`;
-                 // Adicionar o filtro de série aqui é importante para garantir que pegamos os sets do PTCGP
-                 // já que IDs como "A1" podem existir em outras séries.
-                // No entanto, a TCGdex API pode não suportar `serie.id` como filtro direto no endpoint /cards.
-                // Vamos tentar com `set.id` primeiro, e o filtro estrito `card.id.startsWith` cuidará do resto.
-                // Se for confirmado que `/cards?serie.id=tcgp&set.id=A1` funciona e retorna dados com 'types', seria ideal.
-                // Por agora, mantemos o foco no set.id e filtro cliente estrito.
-
-
                 if (currentSearchTerm) { 
                     cardsApiUrl += `&name=${encodeURIComponent(currentSearchTerm)}*`; 
                 }
-                // O filtro de tipo é removido da URL da API
                 console.log(`[fetchAndDisplayCards] Buscando TODAS as cartas de: ${cardsApiUrl} para popular 'allFetchedAndDetailedCards'`);
 
                 let cardsFromApi = []; 
@@ -956,11 +1020,12 @@
                     );
                     console.log(`[fetchAndDisplayCards] 'allFetchedAndDetailedCards' populado com ${allFetchedAndDetailedCards.length} cartas (após filtro estrito de set '${currentSetId}').`);
 
-                    // IMPORTANTE: Verificar se allFetchedAndDetailedCards agora contém 'types'
-                    if (allFetchedAndDetailedCards.length > 0 && !allFetchedAndDetailedCards[0].types) {
-                        console.warn(`[fetchAndDisplayCards] Cartas de ${cardsApiUrl} NÃO contêm a propriedade 'types'. Filtro de tipo não funcionará.`);
-                        // Se não contiver 'types', a etapa de enriquecimento anterior seria necessária aqui.
-                        // No entanto, para simplificar e seguir a tentativa atual, vamos prosseguir e ver o log do filtro de tipo.
+                    // Log para verificar se 'types' está presente nas cartas de allFetchedAndDetailedCards
+                    if (allFetchedAndDetailedCards.length > 0) {
+                        console.log(`[fetchAndDisplayCards - Pós-Filtro-Estrito] Amostra da primeira carta em allFetchedAndDetailedCards: ID=${allFetchedAndDetailedCards[0].id}, Name=${allFetchedAndDetailedCards[0].name}, Types=${JSON.stringify(allFetchedAndDetailedCards[0].types)}, Rarity=${allFetchedAndDetailedCards[0].rarity}`);
+                        if (!allFetchedAndDetailedCards[0].types) {
+                             console.warn(`[fetchAndDisplayCards] ATENÇÃO: A primeira carta em allFetchedAndDetailedCards NÃO possui a propriedade 'types'. O filtro de tipo pode não funcionar.`);
+                        }
                     }
 
 
@@ -971,39 +1036,34 @@
                 }
             }
 
-            let cardsToFilter = [...allFetchedAndDetailedCards]; // Começa com todas as cartas carregadas para o set
-
-            // Filtro de tipo APLICADO NO CLIENTE
+            let cardsToFilter = [...allFetchedAndDetailedCards]; 
+            
             if (currentSelectedType) {
                 console.log(`[fetchAndDisplayCards] Aplicando filtro de tipo cliente: '${currentSelectedType}' em ${cardsToFilter.length} cartas.`);
                 
                 if(cardsToFilter.length > 0) {
-                    const sampleSize = Math.min(cardsToFilter.length, 5);
+                    const sampleSize = Math.min(cardsToFilter.length, 10); 
                     console.log(`[TypeFilterDebug] Amostra de ${sampleSize} cartas ANTES do filtro de tipo. currentSelectedType: '${currentSelectedType}'`);
                     for(let i = 0; i < sampleSize; i++) {
                         const card = cardsToFilter[i];
-                        // Adiciona log para a propriedade types de cada carta na amostra
                         console.log(`  [TypeFilterDebug] Card ${i}: ID=${card.id}, Name=${card.name}, Types=${JSON.stringify(card.types)}`);
                     }
                 }
 
                 cardsToFilter = cardsToFilter.filter((card, index) => {
                     const hasTypesProperty = card.types && Array.isArray(card.types);
-                    if (!hasTypesProperty) {
-                        // Este log é importante para ver se 'types' está faltando
-                        if (index < 10) console.log(`  [TypeFilterDebug - FALHA] Card ${card.id} (${card.name}) não possui 'types' array ou é undefined. Valor de card.types: ${JSON.stringify(card.types)}`);
-                        return false;
+                    // Log se a propriedade types não existir ou não for um array
+                    if (!hasTypesProperty && index < 20) { // Loga para as primeiras 20 cartas que falharem na verificação
+                        console.log(`  [TypeFilterDebug - CHECK FALHOU] Card ${card.id} (${card.name}) - hasTypesProperty: ${hasTypesProperty}, card.types: ${JSON.stringify(card.types)}`);
                     }
+                    if (!hasTypesProperty) return false;
+                    
                     const typeMatch = card.types.includes(currentSelectedType);
-                    // Log para ver quais cartas estão sendo filtradas (ou mantidas) pelo tipo
-                    // if (index < 10 && !typeMatch) console.log(`  [TypeFilterDebug - NÃO INCLUI] Card ${card.id} tipos ${JSON.stringify(card.types)} NÃO incluem '${currentSelectedType}'`);
-                    // if (index < 10 && typeMatch) console.log(`  [TypeFilterDebug - INCLUI] Card ${card.id} tipos ${JSON.stringify(card.types)} INCLUEM '${currentSelectedType}'`);
                     return typeMatch;
                 });
                 console.log(`[fetchAndDisplayCards] Cartas após filtro de tipo cliente: ${cardsToFilter.length}`);
             }
             
-            // Paginação sobre a lista já filtrada por tipo e nome (nome pela API, tipo pelo cliente)
             let cardsForCurrentPage;
             if (cardsPerPage === 'all') {
                 cardsForCurrentPage = cardsToFilter;
@@ -1070,8 +1130,6 @@
             currentSelectedType = e.target.value;
             currentPage = 1; 
             currentlyDisplayedCards = []; 
-            // Não precisa limpar allFetchedAndDetailedCards aqui, pois ele já contém todas as cartas do set
-            // Apenas re-filtra e re-pagina a partir dessa lista.
             fetchAndDisplayCards(); 
         });
 
