@@ -79,7 +79,7 @@
         .energy-icon, .rarity-icon { 
             width: 20px;
             height: 20px;
-            margin-right: 2px; /* Reduzido para ícones repetidos ficarem mais juntos */
+            margin-right: 2px; 
             vertical-align: middle; 
             display: inline-block; 
         }
@@ -330,7 +330,8 @@
                 sizeSmallOption: "Pequeno",
                 sizeMediumOption: "Médio",
                 sizeLargeOption: "Grande",
-                loadMoreButton: "Carregar Mais"
+                loadMoreButton: "Carregar Mais",
+                fetchingDetails: "A obter detalhes" // Nova tradução
             },
             'en': { 
                 pageTitle: "PTCGP - Set Cards",
@@ -381,7 +382,8 @@
                 sizeSmallOption: "Small",
                 sizeMediumOption: "Medium",
                 sizeLargeOption: "Large",
-                loadMoreButton: "Load More"
+                loadMoreButton: "Load More",
+                fetchingDetails: "Fetching details" // Nova tradução
             },
              'es': { // Traduções para Espanhol (exemplo)
                 pageTitle: "PTCGP - Cartas del Set",
@@ -394,7 +396,8 @@
                 sizeSmallOption: "Pequeño",
                 sizeMediumOption: "Mediano",
                 sizeLargeOption: "Grande",
-                loadMoreButton: "Cargar Más"
+                loadMoreButton: "Cargar Más",
+                fetchingDetails: "Obteniendo detalles" // Nova tradução
                 // ... outras traduções de 'es'
             },
             // ... (outras línguas)
@@ -463,11 +466,7 @@
             "Colorless": "ene/cmn_icn_ene_nor.png",
         };
 
-        // MODIFICADO: Mapeamento de raridades para ícones locais e contagem de repetição
         const rarityIcons = {
-            // English API Keys - Mapeamento para os nomes da sua imagem "image_aa8e5c.png"
-            // As chaves aqui devem corresponder exatamente às strings de raridade que a API TCGdex retorna.
-            // Este é um mapeamento inicial e pode precisar de ajustes após verificar os dados reais da API.
             "One Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },
             "Two Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },
             "Three Diamond": { path: "rarity/cmn_icn_rarity_01.png", repeat: 3 },
@@ -478,22 +477,24 @@
             "Crown": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },
             "One Shiny": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 },
             "Two Shiny": { path: "rarity/cmn_icn_rarity_04.png", repeat: 2 },
-
-            // Mapeamento Genérico (caso os nomes acima não sejam os da API TCGdex)
-            // Estes são os nomes que eu tinha mapeado antes, que são mais comuns na API TCGdex.
-            // Se a API retornar estas strings, os ícones correspondentes da sua imagem serão usados.
-            "Common": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },      // Losango
-            "Uncommon": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },    // 2 Losangos (exemplo)
-            "Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },        // 1 Estrela
-            "Rare Holo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 },   // 2 Estrelas (exemplo)
-            "Double Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 }, // 2 Estrelas
-            "Ultra Rare": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },  // 1 Coroa
-            "Secret Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 }, // 1 Estrela Brilhante
-            "Hyper Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 2 },  // 2 Estrelas Brilhantes (exemplo)
-            "Promo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },       // 1 Estrela (exemplo para Promo)
-
-            // Adicionar traduções se a API retornar raridades localizadas e você quiser mapeá-las.
-            // Ex: "Comum": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },
+            "Common": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },      
+            "Uncommon": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },    
+            "Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },        
+            "Rare Holo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 }, // Normalmente 1 estrela, mas holo
+            "Double Rare": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 }, 
+            "Ultra Rare": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },  
+            "Secret Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 }, 
+            "Hyper Rare": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 },  // Geralmente é mais do que Secret
+            "Promo": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },
+            // Adicionar PT-BR
+            "Comum": { path: "rarity/cmn_icn_rarity_01.png", repeat: 1 },
+            "Incomum": { path: "rarity/cmn_icn_rarity_01.png", repeat: 2 },
+            "Rara": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },
+            "Rara Holográfica": { path: "rarity/cmn_icn_rarity_02.png", repeat: 1 },
+            "Rara Dupla": { path: "rarity/cmn_icn_rarity_02.png", repeat: 2 },
+            "Ultra Rara": { path: "rarity/cmn_icn_rarity_03.png", repeat: 1 },
+            "Rara Secreta": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 },
+            "Hiper Rara": { path: "rarity/cmn_icn_rarity_04.png", repeat: 1 }, // Ajuste para 'Hiper'
         };
 
 
@@ -527,11 +528,22 @@
             return img.outerHTML;
         }
 
-        // MODIFICADO: Função para obter o HTML do ícone de raridade, com repetição
         function getRarityIconHTML(rarityString) {
             if (!rarityString) return `<span class="rarity-text-fallback">${translate('unavailable')}</span>`;
+            
+            // Tenta encontrar uma correspondência exata primeiro
+            let rarityInfo = rarityIcons[rarityString];
 
-            const rarityInfo = rarityIcons[rarityString]; 
+            // Fallback para chaves em inglês se a traduzida não for encontrada (caso a API retorne sempre em inglês para raridade)
+            if (!rarityInfo) {
+                const englishRarities = ["Common", "Uncommon", "Rare", "Rare Holo", "Double Rare", "Ultra Rare", "Secret Rare", "Hyper Rare", "Promo", "One Diamond", "Two Diamond", "Three Diamond", "Four Diamond", "One Star", "Two Star", "Three Star", "Crown", "One Shiny", "Two Shiny"];
+                for (const key of englishRarities) {
+                    if (rarityString.toLowerCase().includes(key.toLowerCase())) {
+                        rarityInfo = rarityIcons[key];
+                        if (rarityInfo) break;
+                    }
+                }
+            }
             
             if (rarityInfo && rarityInfo.path && rarityInfo.repeat > 0) {
                 let iconsHtml = "";
@@ -539,17 +551,13 @@
                     const img = document.createElement('img');
                     img.src = rarityInfo.path;
                     img.alt = rarityString;
-                    img.title = rarityString; // O title pode mostrar a string completa da raridade
+                    img.title = rarityString; 
                     img.className = "rarity-icon"; 
                     
-                    // O onerror pode ser simplificado, pois se um falhar, os outros provavelmente também.
-                    // Ou pode ter um fallback mais complexo se necessário.
                     img.onerror = function() { 
                         const textNode = document.createElement('span');
                         textNode.className = 'rarity-text-fallback';
-                        // Se a imagem falhar, mostra o texto da raridade em vez de múltiplos [R]
                         textNode.textContent = rarityString; 
-                        // Substitui todos os ícones planejados pelo texto se um falhar, para evitar mistura.
                         if (this.parentNode) {
                             this.parentNode.innerHTML = `<span class="rarity-text-fallback">${rarityString}</span>`;
                         }
@@ -558,7 +566,6 @@
                 }
                 return iconsHtml;
             }
-            // Fallback se a raridade não estiver mapeada ou não tiver ícone, mostra o texto da raridade.
             return `<span class="rarity-text-fallback">${rarityString}</span>`;
         }
 
@@ -608,8 +615,7 @@
             
             const cardRarityP = document.createElement('p');
             cardRarityP.className = 'text-sm text-gray-600 flex items-center'; 
-            // Log para depurar qual valor de raridade está sendo passado
-            // console.log(`Card: ${cardData.name}, Rarity from API: '${cardData.rarity}'`); 
+            // console.log(`Card: ${cardData.name}, Rarity from API: '${cardData.rarity}' -> Icon HTML: ${getRarityIconHTML(cardData.rarity)}`); 
             cardRarityP.innerHTML = `${translate('rarity')}: ${getRarityIconHTML(cardData.rarity)}`;
 
 
@@ -992,7 +998,7 @@
                 allFetchedAndDetailedCards = []; 
             }
 
-            if (currentPage === 1 || allFetchedAndDetailedCards.length === 0) {
+            if (currentPage === 1 || allFetchedAndDetailedCards.length === 0) { // Só busca da API se for a primeira página da seleção atual ou se a lista estiver vazia
                 let cardsApiUrl = `https://api.tcgdex.net/v2/${currentLanguage}/cards?set.id=${currentSetId}`;
                 if (currentSearchTerm) { 
                     cardsApiUrl += `&name=${encodeURIComponent(currentSearchTerm)}*`; 
@@ -1012,18 +1018,56 @@
                         else console.warn("Formato de resposta inesperado para /cards:", responseData);
                     }
                     
-                    allFetchedAndDetailedCards = cardsFromApi.filter(card => 
+                    let initialSetCards = cardsFromApi.filter(card => 
                         card.id && card.id.startsWith(currentSetId + '-')
                     );
-                    console.log(`[fetchAndDisplayCards] 'allFetchedAndDetailedCards' populado com ${allFetchedAndDetailedCards.length} cartas (após filtro estrito de set '${currentSetId}').`);
+                    console.log(`[fetchAndDisplayCards] Initial cards after strict set filter '${currentSetId}': ${initialSetCards.length}`);
 
-                    if (allFetchedAndDetailedCards.length > 0) {
-                        console.log(`[fetchAndDisplayCards - Pós-Filtro-Estrito] Amostra da primeira carta em allFetchedAndDetailedCards: ID=${allFetchedAndDetailedCards[0].id}, Name=${allFetchedAndDetailedCards[0].name}, Types=${JSON.stringify(allFetchedAndDetailedCards[0].types)}, Rarity=${allFetchedAndDetailedCards[0].rarity}`);
-                        if (!allFetchedAndDetailedCards[0].types) {
-                             console.warn(`[fetchAndDisplayCards] ATENÇÃO: A primeira carta em allFetchedAndDetailedCards NÃO possui a propriedade 'types'. O filtro de tipo pode não funcionar como esperado, pois depende dessa propriedade.`);
+                    // --- BEGIN ENRICHMENT STEP ---
+                    if (initialSetCards.length > 0) {
+                        const cardsMissingTypes = initialSetCards.filter(cb => !cb.types || !cb.rarity); // Verifica se falta types OU rarity
+                        
+                        if (cardsMissingTypes.length > 0) {
+                            console.log(`[fetchAndDisplayCards] Enrichment: Fetching full details for ${cardsMissingTypes.length} cards missing 'types' or 'rarity'.`);
+                            const loadingTextP = loadingIndicator.querySelector('p');
+                            
+                            const enrichedCardsMap = new Map(); 
+
+                            for (let i = 0; i < cardsMissingTypes.length; i++) {
+                                const cardBrief = cardsMissingTypes[i];
+                                loadingTextP.textContent = `${translate('fetchingDetails')} (${i + 1}/${cardsMissingTypes.length})...`;
+                                try {
+                                    const detailResponse = await fetch(`https://api.tcgdex.net/v2/${currentLanguage}/cards/${cardBrief.id}`);
+                                    if (detailResponse.ok) {
+                                        const detailedCard = await detailResponse.json();
+                                        enrichedCardsMap.set(detailedCard.id, detailedCard);
+                                    } else {
+                                        console.warn(`Enrichment: Error fetching details for ${cardBrief.id}: ${detailResponse.status}`);
+                                        enrichedCardsMap.set(cardBrief.id, {...cardBrief, _fetchError: true}); // Mantém brief, marca erro
+                                    }
+                                } catch (err) {
+                                    console.error(`Enrichment: Fetch error for ${cardBrief.id}:`, err);
+                                    enrichedCardsMap.set(cardBrief.id, {...cardBrief, _fetchError: true}); // Mantém brief, marca erro
+                                }
+                            }
+                            
+                            allFetchedAndDetailedCards = initialSetCards.map(cardBrief => {
+                                return enrichedCardsMap.get(cardBrief.id) || cardBrief;
+                            });
+
+                            loadingTextP.textContent = translate('loadingCards'); 
+                            console.log(`[fetchAndDisplayCards] Enrichment complete. 'allFetchedAndDetailedCards' has ${allFetchedAndDetailedCards.length} cards.`);
+                            if (allFetchedAndDetailedCards.length > 0) {
+                                console.log(`[fetchAndDisplayCards - Post-Enrichment] Amostra da primeira carta: ID=${allFetchedAndDetailedCards[0].id}, Name=${allFetchedAndDetailedCards[0].name}, Types=${JSON.stringify(allFetchedAndDetailedCards[0].types)}, Rarity=${JSON.stringify(allFetchedAndDetailedCards[0].rarity)}`);
+                            }
+                        } else {
+                            allFetchedAndDetailedCards = initialSetCards; 
+                            console.log("[fetchAndDisplayCards] Enrichment not needed or no cards to enrich. All cards from initial fetch seem to have 'types' and 'rarity'.");
                         }
+                    } else {
+                        allFetchedAndDetailedCards = []; 
                     }
-
+                    // --- END ENRICHMENT STEP ---
 
                 } catch (error) { 
                     console.error(`Falha ao buscar ou processar cartas. URL: ${cardsApiUrl}. Erro:`, error);
@@ -1037,24 +1081,24 @@
             if (currentSelectedType) {
                 console.log(`[fetchAndDisplayCards] Aplicando filtro de tipo cliente: '${currentSelectedType}' em ${cardsToFilter.length} cartas.`);
                 
-                if(cardsToFilter.length > 0) {
-                    const sampleSize = Math.min(cardsToFilter.length, 10); 
-                    console.log(`[TypeFilterDebug] Amostra de ${sampleSize} cartas ANTES do filtro de tipo. currentSelectedType: '${currentSelectedType}'`);
-                    for(let i = 0; i < sampleSize; i++) {
+                if(cardsToFilter.length > 0 && cardsToFilter.length <= 10) { // Log para todas se forem poucas
+                    console.log(`[TypeFilterDebug] Cartas ANTES do filtro de tipo. currentSelectedType: '${currentSelectedType}'`);
+                    cardsToFilter.forEach((card, idx) => {
+                         console.log(`  [TypeFilterDebug] Card ${idx}: ID=${card.id}, Name=${card.name}, Types=${JSON.stringify(card.types)}`);
+                    });
+                } else if (cardsToFilter.length > 10) { // Log de amostra se forem muitas
+                    console.log(`[TypeFilterDebug] Amostra de 10 cartas ANTES do filtro de tipo. currentSelectedType: '${currentSelectedType}'`);
+                    for(let i = 0; i < 10; i++) {
                         const card = cardsToFilter[i];
                         console.log(`  [TypeFilterDebug] Card ${i}: ID=${card.id}, Name=${card.name}, Types=${JSON.stringify(card.types)}`);
                     }
                 }
 
-                cardsToFilter = cardsToFilter.filter((card, index) => {
+
+                cardsToFilter = cardsToFilter.filter((card) => {
                     const hasTypesProperty = card.types && Array.isArray(card.types);
-                    if (!hasTypesProperty && index < 20) { 
-                        console.log(`  [TypeFilterDebug - CHECK FALHOU] Card ${card.id} (${card.name}) - hasTypesProperty: ${hasTypesProperty}, card.types: ${JSON.stringify(card.types)}`);
-                    }
                     if (!hasTypesProperty) return false;
-                    
-                    const typeMatch = card.types.includes(currentSelectedType);
-                    return typeMatch;
+                    return card.types.includes(currentSelectedType);
                 });
                 console.log(`[fetchAndDisplayCards] Cartas após filtro de tipo cliente: ${cardsToFilter.length}`);
             }
